@@ -1,1 +1,334 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Japanese Vocabulary Quiz</title>
 
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #171a3a, #29235c);
+        color: white;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .game {
+        width: 95%;
+        max-width: 650px;
+        background: white;
+        color: #222;
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .title {
+        font-size: 22px;
+        font-weight: bold;
+        color: #555;
+        margin-bottom: 25px;
+    }
+
+    .japanese {
+        font-size: 52px;
+        font-weight: bold;
+        margin: 20px 0 30px;
+        color: #171a3a;
+    }
+
+    .options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .option {
+        border: none;
+        border-radius: 14px;
+        padding: 18px 10px;
+        font-size: 19px;
+        font-weight: bold;
+        background: #f2f2f2;
+        cursor: pointer;
+        transition: 0.2s;
+        box-shadow: 0 4px 0 #ccc;
+    }
+
+    .option:hover {
+        background: #e5e5e5;
+        transform: translateY(-2px);
+    }
+
+    .correct {
+        background: #58cc02 !important;
+        color: white;
+        box-shadow: 0 4px 0 #46a302 !important;
+    }
+
+    .wrong {
+        background: #ff4b4b !important;
+        color: white;
+        box-shadow: 0 4px 0 #d93636 !important;
+    }
+
+    .score {
+        margin-top: 25px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .progress {
+        height: 10px;
+        background: #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: #58cc02;
+        transition: 0.3s;
+    }
+
+    @media (max-width: 500px) {
+        .japanese {
+            font-size: 40px;
+        }
+
+        .options {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <div class="title">Japanese Vocabulary Quiz</div>
+
+    <div class="progress">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="japanese" id="japaneseWord"></div>
+
+    <div class="options" id="options"></div>
+
+    <div class="score">
+        Score: <span id="score">0</span>
+    </div>
+
+</div>
+
+<script>
+
+const questions = [
+    {
+        japanese: "あさいち",
+        correct: "সকালের প্রথম দিকে",
+        options: [
+            "সকালের প্রথম দিকে",
+            "দুপুর",
+            "সন্ধ্যা",
+            "মধ্যরাত",
+            "ছুটির দিন",
+            "প্রতি সপ্তাহে"
+        ]
+    },
+
+    {
+        japanese: "まんなか",
+        correct: "মাঝখান",
+        options: [
+            "উপরের অংশ",
+            "মাঝখান",
+            "নিচের অংশ",
+            "বাইরে",
+            "সামনে",
+            "পেছনে"
+        ]
+    },
+
+    {
+        japanese: "としょかん",
+        correct: "লাইব্রেরি",
+        options: [
+            "হাসপাতাল",
+            "স্কুল",
+            "লাইব্রেরি",
+            "স্টেশন",
+            "ব্যাংক",
+            "ডাকঘর"
+        ]
+    },
+
+    {
+        japanese: "しごと",
+        correct: "কাজ",
+        options: [
+            "পড়াশোনা",
+            "কাজ",
+            "ভ্রমণ",
+            "খেলা",
+            "ঘুম",
+            "খাবার"
+        ]
+    }
+];
+
+let currentQuestion = 0;
+let score = 0;
+
+function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+}
+
+function loadQuestion() {
+
+    if (currentQuestion >= questions.length) {
+        showResult();
+        return;
+    }
+
+    const question = questions[currentQuestion];
+
+    document.getElementById("japaneseWord").textContent =
+        question.japanese;
+
+    const optionsContainer =
+        document.getElementById("options");
+
+    optionsContainer.innerHTML = "";
+
+    const shuffledOptions = shuffle([...question.options]);
+
+    shuffledOptions.forEach(option => {
+
+        const button = document.createElement("button");
+
+        button.className = "option";
+        button.textContent = option;
+
+        button.onclick = () => checkAnswer(
+            button,
+            option,
+            question.correct
+        );
+
+        optionsContainer.appendChild(button);
+    });
+
+    const progress =
+        (currentQuestion / questions.length) * 100;
+
+    document.getElementById("progressBar").style.width =
+        progress + "%";
+}
+
+function checkAnswer(button, selected, correct) {
+
+    const buttons =
+        document.querySelectorAll(".option");
+
+    buttons.forEach(btn => {
+        btn.disabled = true;
+    });
+
+    if (selected === correct) {
+
+        button.classList.add("correct");
+
+        score++;
+
+        document.getElementById("score").textContent =
+            score;
+
+        setTimeout(() => {
+
+            currentQuestion++;
+
+            loadQuestion();
+
+        }, 600);
+
+    } else {
+
+        button.classList.add("wrong");
+
+        buttons.forEach(btn => {
+
+            if (btn.textContent === correct) {
+                btn.classList.add("correct");
+            }
+
+        });
+
+        setTimeout(() => {
+
+            currentQuestion++;
+
+            loadQuestion();
+
+        }, 1000);
+    }
+}
+
+function showResult() {
+
+    document.querySelector(".game").innerHTML = `
+
+        <div class="title">
+            Quiz Complete 🎉
+        </div>
+
+        <div style="font-size:60px;">
+            🏆
+        </div>
+
+        <h2>
+            Your Score
+        </h2>
+
+        <div style="font-size:40px;font-weight:bold;">
+            ${score} / ${questions.length}
+        </div>
+
+        <button
+            onclick="location.reload()"
+            style="
+                margin-top:25px;
+                padding:15px 35px;
+                border:none;
+                border-radius:12px;
+                background:#58cc02;
+                color:white;
+                font-size:18px;
+                font-weight:bold;
+                cursor:pointer;
+            "
+        >
+            আবার খেলুন
+        </button>
+    `;
+}
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
